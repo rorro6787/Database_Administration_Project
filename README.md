@@ -42,8 +42,4 @@ Se aplicarán medidas de seguridad adecuadas durante el proceso de desarrollo y 
 
 Este proyecto es un trabajo en curso y se aprecian las contribuciones de cualquier persona interesada. Si tienes sugerencias, ideas o deseas contribuir de alguna manera, no dudes en abrir un problema o enviar una solicitud de extracción.
 
-## Licencia
-
-Este proyecto se encuentra bajo la Licencia [MIT](LICENSE).
-
 
