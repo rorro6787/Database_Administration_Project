@@ -14,11 +14,11 @@ El equipo de este proyecto está compuesto por:
 
 El repositorio está organizado de la siguiente manera:
 
-- **/Documentación**: Esta carpeta contiene documentos importantes relacionados con el proyecto, como diagramas, esquemas y especificaciones técnicas.
+- **/Modelo_Base_Datos**: Esta carpeta contiene una imagen del modelo relacional de nuestra base de datos.
 
 - **/Scripts**: Aquí se encuentran los scripts utilizados para la creación y mantenimiento de la base de datos en Oracle.
 
-- **/Implementación**: Contiene archivos y documentos relacionados con la implementación del modelo de base de datos en el entorno de Oracle, incluyendo configuraciones y procedimientos de despliegue.
+- **/ValoresTablas**: Contiene documentos con los valores que insertaremos en las filas de nuestras tablas en la base de datos.
 
 ## Modelo de la Base de Datos
 
@@ -29,7 +29,10 @@ El modelo de la base de datos se encuentra definido en el archivo [modelo.sql](/
 
 ## Despliegue en Oracle
 
-Para desplegar el modelo de la base de datos en Oracle, sigue las instrucciones detalladas en la carpeta [/Implementación](/Implementación).
+Para desplegar el modelo de la base de datos en tu Oracle, sigue las siguientes instrucciones detalladas:
+- **Paso 1:** ejecuta en "system" el script Scripts/system.sql
+- **Paso 2:** guarda en la siguiente ruta de tu ordenador C:\app\alumnos\admin\orcl\dpdump, el archivo ValoresTablas/Ejercicios.csv
+- **Paso 3:** ejecuta en "lifefit" el script Scripts/lifefit.sql
 
 ## Medidas de Seguridad
 
