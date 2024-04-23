@@ -9,6 +9,7 @@ El equipo de este proyecto está compuesto por:
 - Rodrigo Carreira
 - Ivan Iroslavov
 - Juan de Dios
+- Antonio Yepes
 
 ## Contenido del Repositorio
 
