@@ -1,5 +1,5 @@
 --------------------------------------------------------
--- Archivo creado  - miércoles-abril-17-2024   
+-- Archivo creado  - lunes-abril-29-2024   
 --------------------------------------------------------
 DROP SEQUENCE "LIFEFIT"."SEQ_EJERCICIOS";
 DROP TABLE "LIFEFIT"."CENTRO" cascade constraints;
@@ -18,6 +18,7 @@ DROP TABLE "LIFEFIT"."RUTINA" cascade constraints;
 DROP TABLE "LIFEFIT"."SESIÓN" cascade constraints;
 DROP TABLE "LIFEFIT"."USUARIO" cascade constraints;
 DROP VIEW "LIFEFIT"."V_CORREO_USUARIO";
+DROP VIEW "LIFEFIT"."VEJERCICIO";
 DROP VIEW "LIFEFIT"."V_OBJETIVO_CLIENTE";
 DROP VIEW "LIFEFIT"."V_VIDEO_SESION";
 DROP MATERIALIZED VIEW "LIFEFIT"."VM_EJERCICIOS";
@@ -126,7 +127,8 @@ DROP MATERIALIZED VIEW "LIFEFIT"."VM_EJERCICIOS";
 	"NOMBRE" VARCHAR2(24 BYTE), 
 	"DESCRIPCIÓN" VARCHAR2(4000 BYTE), 
 	"VÍDEO" VARCHAR2(60 BYTE), 
-	"IMAGEN" BLOB
+	"IMAGEN" BLOB, 
+	"PUBLICO" CHAR(1 BYTE) DEFAULT 'S'
    ) SEGMENT CREATION IMMEDIATE 
   PCTFREE 10 PCTUSED 40 INITRANS 1 MAXTRANS 255 
  NOCOMPRESS LOGGING
@@ -261,6 +263,7 @@ DROP MATERIALIZED VIEW "LIFEFIT"."VM_EJERCICIOS";
   GRANT DELETE ON "LIFEFIT"."RUTINA" TO "R_ENTRENADOR";
   GRANT INSERT ON "LIFEFIT"."RUTINA" TO "R_ENTRENADOR";
   GRANT UPDATE ON "LIFEFIT"."RUTINA" TO "R_ENTRENADOR";
+  GRANT SELECT ON "LIFEFIT"."RUTINA" TO "R_ENTRENADOR";
 --------------------------------------------------------
 --  DDL for Table SESIÓN
 --------------------------------------------------------
@@ -309,6 +312,13 @@ DROP MATERIALIZED VIEW "LIFEFIT"."VM_EJERCICIOS";
 ;
   GRANT SELECT ON "LIFEFIT"."V_CORREO_USUARIO" TO "R_ENTRENADOR";
 --------------------------------------------------------
+--  DDL for View VEJERCICIO
+--------------------------------------------------------
+
+  CREATE OR REPLACE FORCE EDITIONABLE VIEW "LIFEFIT"."VEJERCICIO" ("ID", "NOMBRE", "DESCRIPCIÓN", "VÍDEO", "IMAGEN") AS 
+  SELECT id, nombre, descripcion, video, imagen FROM "LIFEFIT"."EJERCICIO" where publico = 'S'
+;
+--------------------------------------------------------
 --  DDL for View V_OBJETIVO_CLIENTE
 --------------------------------------------------------
 
@@ -343,15 +353,25 @@ DROP MATERIALIZED VIEW "LIFEFIT"."VM_EJERCICIOS";
   PCTINCREASE 0
   BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)) 
   BUILD IMMEDIATE
-  USING INDEX PCTFREE 10 INITRANS 2 MAXTRANS 255 
+  USING INDEX 
+  REFRESH FORCE ON DEMAND START WITH sysdate+0 NEXT TRUNC(SYSDATE) + 1
+  USING DEFAULT LOCAL ROLLBACK SEGMENT
+  USING ENFORCED CONSTRAINTS DISABLE ON QUERY COMPUTATION DISABLE QUERY REWRITE
+  AS SELECT "EJERCICIO"."ID" "ID","EJERCICIO"."NOMBRE" "NOMBRE","EJERCICIO"."DESCRIPCIÓN" "DESCRIPCIÓN","EJERCICIO"."VÍDEO" "VÍDEO","EJERCICIO"."IMAGEN" "IMAGEN" FROM "EJERCICIO" "EJERCICIO";
+
+  CREATE UNIQUE INDEX "LIFEFIT"."SYS_IL0000087268C00005$$" ON "LIFEFIT"."VM_EJERCICIOS" (
+  PCTFREE 10 INITRANS 2 MAXTRANS 255 
   STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
   PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
   BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
   TABLESPACE "TS_LIFEFIT" 
-  REFRESH FORCE ON DEMAND START WITH sysdate+0 NEXT TRUNC(SYSDATE) + 1
-  WITH PRIMARY KEY USING DEFAULT LOCAL ROLLBACK SEGMENT
-  USING ENFORCED CONSTRAINTS DISABLE ON QUERY COMPUTATION DISABLE QUERY REWRITE
-  AS SELECT "EJERCICIO"."ID" "ID","EJERCICIO"."NOMBRE" "NOMBRE","EJERCICIO"."DESCRIPCIÓN" "DESCRIPCIÓN","EJERCICIO"."VÍDEO" "VÍDEO","EJERCICIO"."IMAGEN" "IMAGEN" FROM "EJERCICIO" "EJERCICIO";
+  PARALLEL (DEGREE 0 INSTANCES 0) ;
+  CREATE UNIQUE INDEX "LIFEFIT"."SYS_C_SNAP$_1EJERCICIO_PK" ON "LIFEFIT"."VM_EJERCICIOS" ("ID") 
+  PCTFREE 10 INITRANS 2 MAXTRANS 255 COMPUTE STATISTICS 
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "TS_LIFEFIT" ;
 
    COMMENT ON MATERIALIZED VIEW "LIFEFIT"."VM_EJERCICIOS"  IS 'snapshot table for snapshot LIFEFIT.VM_EJERCICIOS';
 REM INSERTING into LIFEFIT.CENTRO
@@ -396,16 +416,16 @@ REM INSERTING into LIFEFIT.DIETA
 SET DEFINE OFF;
 REM INSERTING into LIFEFIT.EJERCICIO
 SET DEFINE OFF;
-Insert into LIFEFIT.EJERCICIO (ID,NOMBRE,"DESCRIPCIÓN","VÍDEO") values ('1','Sentadillas','Ejercicio básico para fortalecer las piernas. Párate con los pies separados al ancho de los hombros y baja el cuerpo doblando las rodillas, manteniendo la espalda recta. Luego, vuelve a la posición inicial.','https://www.youtube.com/watch?v=QKKZ9AGYTi4');
-Insert into LIFEFIT.EJERCICIO (ID,NOMBRE,"DESCRIPCIÓN","VÍDEO") values ('2','Flexiones de Brazos','Ejercicio para fortalecer los músculos del pecho, hombros y tríceps. Apóyate en el suelo con las manos a la altura de los hombros, manteniendo el cuerpo recto y descendiendo hasta que los codos estén en un ángulo de 90 grados','https://www.youtube.com/watch?v=UwRLWMcOdwI');
-Insert into LIFEFIT.EJERCICIO (ID,NOMBRE,"DESCRIPCIÓN","VÍDEO") values ('3','Plancha Abdominal','Ejercicio de isometría para fortalecer el core. Colócate en posición de plancha, apoyando el peso en los antebrazos y los dedos de los pies, manteniendo el cuerpo recto y los músculos abdominales contraídos.','https://www.youtube.com/watch?v=TvxNkmjdhMM');
-Insert into LIFEFIT.EJERCICIO (ID,NOMBRE,"DESCRIPCIÓN","VÍDEO") values ('4','Levantamiento de Pesas','Ejercicio de fuerza que se puede adaptar a diferentes grupos musculares. Utiliza pesas adecuadas para tu nivel de fuerza, mantén una postura adecuada y realiza movimientos controlados para evitar lesiones.','https://www.youtube.com/watch?v=qEwKCR5JCog');
-Insert into LIFEFIT.EJERCICIO (ID,NOMBRE,"DESCRIPCIÓN","VÍDEO") values ('5','Burpees','Ejercicio que combina flexiones, saltos y sentadillas. Comienza en posición de cuclillas, luego apoya las manos en el suelo, estira las piernas hacia atrás realizando una flexión, lleva las piernas de vuelta a la posición de cuclillas y salta','https://www.youtube.com/watch?v=JZQA08SlJnM');
-Insert into LIFEFIT.EJERCICIO (ID,NOMBRE,"DESCRIPCIÓN","VÍDEO") values ('6','Dominadas','Ejercicio para fortalecer la espalda y los brazos. Agárrate a una barra con las manos separadas al ancho de los hombros y levántate hasta que la barbilla esté por encima de la barra. Luego, baja lentamente hasta la posición inicial.','https://www.youtube.com/watch?v=eGo4IYlbE5g');
-Insert into LIFEFIT.EJERCICIO (ID,NOMBRE,"DESCRIPCIÓN","VÍDEO") values ('7','Zancadas','Ejercicio para fortalecer las piernas y glúteos. Da un paso adelante con una pierna y flexiona ambas rodillas hasta que las piernas formen ángulos de 90 grados. Luego, vuelve a la posición inicial y repite con la otra pierna.','https://www.youtube.com/watch?v=QOVaHwm-Q6U');
-Insert into LIFEFIT.EJERCICIO (ID,NOMBRE,"DESCRIPCIÓN","VÍDEO") values ('8','Flexiones Diamante','Variante de las flexiones que enfatiza más en los tríceps. Coloca las manos juntas debajo del pecho, formando un diamante con los pulgares y los índices. Realiza las flexiones manteniendo los codos cerca del cuerpo.','https://www.youtube.com/watch?v=Jx4cT2Ny8Mg');
-Insert into LIFEFIT.EJERCICIO (ID,NOMBRE,"DESCRIPCIÓN","VÍDEO") values ('9','Elevaciones Laterales','Ejercicio para fortalecer los hombros y los músculos del deltoides medio. De pie, con una mancuerna en cada mano, levanta los brazos hacia los lados hasta que estén paralelos al suelo, luego baja lentamente.','https://www.youtube.com/watch?v=yho0e_9rOwA');
-Insert into LIFEFIT.EJERCICIO (ID,NOMBRE,"DESCRIPCIÓN","VÍDEO") values ('10','Plancha Lateral','Ejercicio para trabajar los músculos abdominales, oblicuos y estabilizadores del core. Acuéstate de lado apoyándote en el antebrazo y el costado del pie, mantén el cuerpo en línea recta y sostén la posición durante el tiempo deseado.','https://www.youtube.com/watch?v=zf0RBDYF8iE');
+Insert into LIFEFIT.EJERCICIO (ID,NOMBRE,"DESCRIPCIÓN","VÍDEO",PUBLICO) values ('1','Sentadillas','Ejercicio básico para fortalecer las piernas. Párate con los pies separados al ancho de los hombros y baja el cuerpo doblando las rodillas, manteniendo la espalda recta. Luego, vuelve a la posición inicial.','https://www.youtube.com/watch?v=QKKZ9AGYTi4','S');
+Insert into LIFEFIT.EJERCICIO (ID,NOMBRE,"DESCRIPCIÓN","VÍDEO",PUBLICO) values ('2','Flexiones de Brazos','Ejercicio para fortalecer los músculos del pecho, hombros y tríceps. Apóyate en el suelo con las manos a la altura de los hombros, manteniendo el cuerpo recto y descendiendo hasta que los codos estén en un ángulo de 90 grados','https://www.youtube.com/watch?v=UwRLWMcOdwI','S');
+Insert into LIFEFIT.EJERCICIO (ID,NOMBRE,"DESCRIPCIÓN","VÍDEO",PUBLICO) values ('3','Plancha Abdominal','Ejercicio de isometría para fortalecer el core. Colócate en posición de plancha, apoyando el peso en los antebrazos y los dedos de los pies, manteniendo el cuerpo recto y los músculos abdominales contraídos.','https://www.youtube.com/watch?v=TvxNkmjdhMM','S');
+Insert into LIFEFIT.EJERCICIO (ID,NOMBRE,"DESCRIPCIÓN","VÍDEO",PUBLICO) values ('4','Levantamiento de Pesas','Ejercicio de fuerza que se puede adaptar a diferentes grupos musculares. Utiliza pesas adecuadas para tu nivel de fuerza, mantén una postura adecuada y realiza movimientos controlados para evitar lesiones.','https://www.youtube.com/watch?v=qEwKCR5JCog','S');
+Insert into LIFEFIT.EJERCICIO (ID,NOMBRE,"DESCRIPCIÓN","VÍDEO",PUBLICO) values ('5','Burpees','Ejercicio que combina flexiones, saltos y sentadillas. Comienza en posición de cuclillas, luego apoya las manos en el suelo, estira las piernas hacia atrás realizando una flexión, lleva las piernas de vuelta a la posición de cuclillas y salta','https://www.youtube.com/watch?v=JZQA08SlJnM','S');
+Insert into LIFEFIT.EJERCICIO (ID,NOMBRE,"DESCRIPCIÓN","VÍDEO",PUBLICO) values ('6','Dominadas','Ejercicio para fortalecer la espalda y los brazos. Agárrate a una barra con las manos separadas al ancho de los hombros y levántate hasta que la barbilla esté por encima de la barra. Luego, baja lentamente hasta la posición inicial.','https://www.youtube.com/watch?v=eGo4IYlbE5g','S');
+Insert into LIFEFIT.EJERCICIO (ID,NOMBRE,"DESCRIPCIÓN","VÍDEO",PUBLICO) values ('7','Zancadas','Ejercicio para fortalecer las piernas y glúteos. Da un paso adelante con una pierna y flexiona ambas rodillas hasta que las piernas formen ángulos de 90 grados. Luego, vuelve a la posición inicial y repite con la otra pierna.','https://www.youtube.com/watch?v=QOVaHwm-Q6U','S');
+Insert into LIFEFIT.EJERCICIO (ID,NOMBRE,"DESCRIPCIÓN","VÍDEO",PUBLICO) values ('8','Flexiones Diamante','Variante de las flexiones que enfatiza más en los tríceps. Coloca las manos juntas debajo del pecho, formando un diamante con los pulgares y los índices. Realiza las flexiones manteniendo los codos cerca del cuerpo.','https://www.youtube.com/watch?v=Jx4cT2Ny8Mg','S');
+Insert into LIFEFIT.EJERCICIO (ID,NOMBRE,"DESCRIPCIÓN","VÍDEO",PUBLICO) values ('9','Elevaciones Laterales','Ejercicio para fortalecer los hombros y los músculos del deltoides medio. De pie, con una mancuerna en cada mano, levanta los brazos hacia los lados hasta que estén paralelos al suelo, luego baja lentamente.','https://www.youtube.com/watch?v=yho0e_9rOwA','S');
+Insert into LIFEFIT.EJERCICIO (ID,NOMBRE,"DESCRIPCIÓN","VÍDEO",PUBLICO) values ('10','Plancha Lateral','Ejercicio para trabajar los músculos abdominales, oblicuos y estabilizadores del core. Acuéstate de lado apoyándote en el antebrazo y el costado del pie, mantén el cuerpo en línea recta y sostén la posición durante el tiempo deseado.','https://www.youtube.com/watch?v=zf0RBDYF8iE','S');
 REM INSERTING into LIFEFIT.EJERCICIOS_EXT
 SET DEFINE OFF;
 Insert into LIFEFIT.EJERCICIOS_EXT (EJERCICIO,DESCRIPCION,ENLACEALVIDEO) values ('Sentadillas','Ejercicio básico para fortalecer las piernas. Párate con los pies separados al ancho de los hombros y baja el cuerpo doblando las rodillas, manteniendo la espalda recta. Luego, vuelve a la posición inicial.','https://www.youtube.com/watch?v=QKKZ9AGYTi4');
@@ -576,16 +596,6 @@ Insert into LIFEFIT.USUARIO (ID,NOMBRE,APELLIDOS,TELEFONO,DIRECCION,CORREO,USUAR
   PCTFREE 10 INITRANS 2 MAXTRANS 255 COMPUTE STATISTICS 
   TABLESPACE "TS_INDICES" ;
 --------------------------------------------------------
---  DDL for Index SYS_C_SNAP$_1EJERCICIO_PK
---------------------------------------------------------
-
-  CREATE UNIQUE INDEX "LIFEFIT"."SYS_C_SNAP$_1EJERCICIO_PK" ON "LIFEFIT"."VM_EJERCICIOS" ("ID") 
-  PCTFREE 10 INITRANS 2 MAXTRANS 255 COMPUTE STATISTICS 
-  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
-  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
-  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
-  TABLESPACE "TS_LIFEFIT" ;
---------------------------------------------------------
 --  DDL for Index USUARIO_PK
 --------------------------------------------------------
 
@@ -612,6 +622,16 @@ Insert into LIFEFIT.USUARIO (ID,NOMBRE,APELLIDOS,TELEFONO,DIRECCION,CORREO,USUAR
   CREATE BITMAP INDEX "LIFEFIT"."IDX_CLIENTE_CENTRO_ID" ON "LIFEFIT"."CLIENTE" ("CENTRO_ID") 
   PCTFREE 10 INITRANS 2 MAXTRANS 255 COMPUTE STATISTICS 
   TABLESPACE "TS_INDICES" ;
+--------------------------------------------------------
+--  DDL for Index SYS_C_SNAP$_1EJERCICIO_PK
+--------------------------------------------------------
+
+  CREATE UNIQUE INDEX "LIFEFIT"."SYS_C_SNAP$_1EJERCICIO_PK" ON "LIFEFIT"."VM_EJERCICIOS" ("ID") 
+  PCTFREE 10 INITRANS 2 MAXTRANS 255 COMPUTE STATISTICS 
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "TS_LIFEFIT" ;
 --------------------------------------------------------
 --  DDL for Index GERENTE__IDX
 --------------------------------------------------------
@@ -652,6 +672,7 @@ BEGIN
     END IF;
 END;
 
+
 /
 ALTER TRIGGER "LIFEFIT"."TR_EJERCICIO" ENABLE;
 --------------------------------------------------------
@@ -675,6 +696,14 @@ ALTER TRIGGER "LIFEFIT"."TR_EJERCICIO" ENABLE;
   ALTER TABLE "LIFEFIT"."CITA" ADD CONSTRAINT "CITA_PKV1" UNIQUE ("CLIENTE_ID")
   USING INDEX "LIFEFIT"."CITA_PKV1"  ENABLE;
 --------------------------------------------------------
+--  Constraints for Table GERENTE
+--------------------------------------------------------
+
+  ALTER TABLE "LIFEFIT"."GERENTE" MODIFY ("ID" NOT NULL ENABLE);
+  ALTER TABLE "LIFEFIT"."GERENTE" MODIFY ("CENTRO_ID" NOT NULL ENABLE);
+  ALTER TABLE "LIFEFIT"."GERENTE" ADD CONSTRAINT "GERENTE_PK" PRIMARY KEY ("ID")
+  USING INDEX "LIFEFIT"."GERENTE_PK"  ENABLE;
+--------------------------------------------------------
 --  Constraints for Table PLAN
 --------------------------------------------------------
 
@@ -685,14 +714,6 @@ ALTER TRIGGER "LIFEFIT"."TR_EJERCICIO" ENABLE;
   ALTER TABLE "LIFEFIT"."PLAN" ADD CONSTRAINT "PLAN_PK" PRIMARY KEY ("INICIO", "ENTRENA_CLIENTE_ID", "ENTRENA_ID1", "RUTINA_ID")
   USING INDEX "LIFEFIT"."PLAN_PK"  ENABLE;
 --------------------------------------------------------
---  Constraints for Table GERENTE
---------------------------------------------------------
-
-  ALTER TABLE "LIFEFIT"."GERENTE" MODIFY ("ID" NOT NULL ENABLE);
-  ALTER TABLE "LIFEFIT"."GERENTE" MODIFY ("CENTRO_ID" NOT NULL ENABLE);
-  ALTER TABLE "LIFEFIT"."GERENTE" ADD CONSTRAINT "GERENTE_PK" PRIMARY KEY ("ID")
-  USING INDEX "LIFEFIT"."GERENTE_PK"  ENABLE;
---------------------------------------------------------
 --  Constraints for Table CENTRO
 --------------------------------------------------------
 
@@ -700,6 +721,15 @@ ALTER TRIGGER "LIFEFIT"."TR_EJERCICIO" ENABLE;
   ALTER TABLE "LIFEFIT"."CENTRO" MODIFY ("NOMBRE" NOT NULL ENABLE);
   ALTER TABLE "LIFEFIT"."CENTRO" ADD CONSTRAINT "CENTRO_PK" PRIMARY KEY ("ID")
   USING INDEX "LIFEFIT"."CENTRO_PK"  ENABLE;
+--------------------------------------------------------
+--  Constraints for Table CLIENTE
+--------------------------------------------------------
+
+  ALTER TABLE "LIFEFIT"."CLIENTE" MODIFY ("CENTRO_ID" NOT NULL ENABLE);
+  ALTER TABLE "LIFEFIT"."CLIENTE" ADD CONSTRAINT "CLIENTE_PK" PRIMARY KEY ("ID")
+  USING INDEX "LIFEFIT"."CLIENTE_PK"  ENABLE;
+  ALTER TABLE "LIFEFIT"."CLIENTE" MODIFY ("ID" NOT NULL ENABLE);
+  ALTER TABLE "LIFEFIT"."CLIENTE" MODIFY ("OBJETIVO" NOT NULL ENABLE);
 --------------------------------------------------------
 --  Constraints for Table DIETA
 --------------------------------------------------------
@@ -710,15 +740,6 @@ ALTER TRIGGER "LIFEFIT"."TR_EJERCICIO" ENABLE;
   USING INDEX "LIFEFIT"."DIETA_PK"  ENABLE;
   ALTER TABLE "LIFEFIT"."DIETA" ADD CONSTRAINT "DIETA_NOMBRE_UN" UNIQUE ("NOMBRE")
   USING INDEX "LIFEFIT"."DIETA_NOMBRE_UN"  ENABLE;
---------------------------------------------------------
---  Constraints for Table CLIENTE
---------------------------------------------------------
-
-  ALTER TABLE "LIFEFIT"."CLIENTE" MODIFY ("ID" NOT NULL ENABLE);
-  ALTER TABLE "LIFEFIT"."CLIENTE" MODIFY ("OBJETIVO" NOT NULL ENABLE);
-  ALTER TABLE "LIFEFIT"."CLIENTE" MODIFY ("CENTRO_ID" NOT NULL ENABLE);
-  ALTER TABLE "LIFEFIT"."CLIENTE" ADD CONSTRAINT "CLIENTE_PK" PRIMARY KEY ("ID")
-  USING INDEX "LIFEFIT"."CLIENTE_PK"  ENABLE;
 --------------------------------------------------------
 --  Constraints for Table ENTRENADOR
 --------------------------------------------------------
@@ -754,14 +775,7 @@ ALTER TRIGGER "LIFEFIT"."TR_EJERCICIO" ENABLE;
   ALTER TABLE "LIFEFIT"."EJERCICIO" MODIFY ("NOMBRE" NOT NULL ENABLE);
   ALTER TABLE "LIFEFIT"."EJERCICIO" ADD CONSTRAINT "EJERCICIO_PK" PRIMARY KEY ("ID")
   USING INDEX "LIFEFIT"."EJERCICIO_PK"  ENABLE;
---------------------------------------------------------
---  Constraints for Table RUTINA
---------------------------------------------------------
-
-  ALTER TABLE "LIFEFIT"."RUTINA" MODIFY ("ID" NOT NULL ENABLE);
-  ALTER TABLE "LIFEFIT"."RUTINA" MODIFY ("NOMBRE" NOT NULL ENABLE);
-  ALTER TABLE "LIFEFIT"."RUTINA" ADD CONSTRAINT "RUTINA_PK" PRIMARY KEY ("ID")
-  USING INDEX "LIFEFIT"."RUTINA_PK"  ENABLE;
+  ALTER TABLE "LIFEFIT"."EJERCICIO" ADD CHECK (PUBLICO IN ('S', 'N')) ENABLE;
 --------------------------------------------------------
 --  Constraints for Table ENTRENA
 --------------------------------------------------------
@@ -778,6 +792,14 @@ ALTER TRIGGER "LIFEFIT"."TR_EJERCICIO" ENABLE;
   ALTER TABLE "LIFEFIT"."CONFORMAN" MODIFY ("EJERCICIO_ID" NOT NULL ENABLE);
   ALTER TABLE "LIFEFIT"."CONFORMAN" ADD CONSTRAINT "CONFORMAN_PK" PRIMARY KEY ("RUTINA_ID", "EJERCICIO_ID")
   USING INDEX "LIFEFIT"."CONFORMAN_PK"  ENABLE;
+--------------------------------------------------------
+--  Constraints for Table RUTINA
+--------------------------------------------------------
+
+  ALTER TABLE "LIFEFIT"."RUTINA" MODIFY ("ID" NOT NULL ENABLE);
+  ALTER TABLE "LIFEFIT"."RUTINA" MODIFY ("NOMBRE" NOT NULL ENABLE);
+  ALTER TABLE "LIFEFIT"."RUTINA" ADD CONSTRAINT "RUTINA_PK" PRIMARY KEY ("ID")
+  USING INDEX "LIFEFIT"."RUTINA_PK"  ENABLE;
 --------------------------------------------------------
 --  Ref Constraints for Table CITA
 --------------------------------------------------------
@@ -848,5 +870,3 @@ ALTER TRIGGER "LIFEFIT"."TR_EJERCICIO" ENABLE;
 
   ALTER TABLE "LIFEFIT"."SESIÓN" ADD CONSTRAINT "SESIÓN_PLAN_FK" FOREIGN KEY ("PLAN_INICIO", "PLAN_ENTRENA_CLIENTE_ID", "PLAN_ENTRENA_ID1", "PLAN_RUTINA_ID")
 	  REFERENCES "LIFEFIT"."PLAN" ("INICIO", "ENTRENA_CLIENTE_ID", "ENTRENA_ID1", "RUTINA_ID") ENABLE;
-
-
