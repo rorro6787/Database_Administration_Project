@@ -248,6 +248,7 @@ DROP MATERIALIZED VIEW "LIFEFIT"."VM_EJERCICIOS";
   GRANT DELETE ON "LIFEFIT"."PLAN" TO "R_ENTRENADOR";
   GRANT INSERT ON "LIFEFIT"."PLAN" TO "R_ENTRENADOR";
   GRANT UPDATE ON "LIFEFIT"."PLAN" TO "R_ENTRENADOR";
+  GRANT SELECT ON "LIFEFIT"."PLAN" TO "R_ENTRENADOR";
 --------------------------------------------------------
 --  DDL for Table RUTINA
 --------------------------------------------------------
@@ -284,6 +285,10 @@ DROP MATERIALIZED VIEW "LIFEFIT"."VM_EJERCICIOS";
  NOCOMPRESS LOGGING
   TABLESPACE "TS_LIFEFIT" ;
   GRANT UPDATE ON "LIFEFIT"."SESIÓN" TO "R_CLIENTE";
+  GRANT DELETE ON "LIFEFIT"."SESIÓN" TO "R_ENTRENADOR";
+  GRANT SELECT ON "LIFEFIT"."SESIÓN" TO "R_ENTRENADOR";
+  GRANT INSERT ON "LIFEFIT"."SESIÓN" TO "R_ENTRENADOR";
+  GRANT UPDATE ON "LIFEFIT"."SESIÓN" TO "R_ENTRENADOR";
 --------------------------------------------------------
 --  DDL for Table USUARIO
 --------------------------------------------------------
