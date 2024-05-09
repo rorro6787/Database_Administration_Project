@@ -871,3 +871,31 @@ ALTER TRIGGER "LIFEFIT"."TR_EJERCICIO" ENABLE;
 
   ALTER TABLE "LIFEFIT"."SESIÓN" ADD CONSTRAINT "SESIÓN_PLAN_FK" FOREIGN KEY ("PLAN_INICIO", "PLAN_ENTRENA_CLIENTE_ID", "PLAN_ENTRENA_ID1", "PLAN_RUTINA_ID")
 	  REFERENCES "LIFEFIT"."PLAN" ("INICIO", "ENTRENA_CLIENTE_ID", "ENTRENA_ID1", "RUTINA_ID") ENABLE;
+
+--------------------------------------------------------
+--  DDL for Security Mecanism for clients training sessions visualization
+--------------------------------------------------------
+
+create or replace function vpd_function(p_schema varchar2, p_obj varchar2)
+  Return varchar2
+is
+  Vusuario VARCHAR2(100);
+  client_id NUMBER;
+Begin
+  Vusuario := SYS_CONTEXT('userenv', 'SESSION_USER');
+  select id into client_id from usuario where usuariooracle = Vusuario; 
+  
+  return 'plan_entrena_cliente_id = ' || client_id;
+End;
+/
+
+BEGIN dbms_rls.add_policy (
+	object_schema=>'LIFEFIT',                  
+	object_name=>'SESIÓN',                 
+	policy_name=>'POL_SESION',              
+	function_schema=>'LIFEFIT',              
+	policy_function=>'VPD_FUNCTION',          
+	statement_types=>'SELECT'  
+);
+end;
+/
