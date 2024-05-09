@@ -23,6 +23,14 @@ DROP VIEW "LIFEFIT"."VEJERCICIO";
 DROP VIEW "LIFEFIT"."V_OBJETIVO_CLIENTE";
 DROP VIEW "LIFEFIT"."V_VIDEO_SESION";
 DROP MATERIALIZED VIEW "LIFEFIT"."VM_EJERCICIOS";
+BEGIN
+  DBMS_RLS.DROP_POLICY (
+    object_schema    => 'LIFEFIT',
+    object_name      => 'SESIÓN',
+    policy_name      => 'POL_SESION'
+  );
+END;
+/
 --------------------------------------------------------
 --  DDL for Sequence SEQ_EJERCICIOS
 --------------------------------------------------------
