@@ -18,6 +18,7 @@ DROP TABLE "LIFEFIT"."RUTINA" cascade constraints;
 DROP TABLE "LIFEFIT"."SESIÓN" cascade constraints;
 DROP TABLE "LIFEFIT"."USUARIO" cascade constraints;
 DROP VIEW "LIFEFIT"."V_CORREO_USUARIO";
+DROP VIEW "LIFEFIT"."V_CITA";
 DROP VIEW "LIFEFIT"."VEJERCICIO";
 DROP VIEW "LIFEFIT"."V_OBJETIVO_CLIENTE";
 DROP VIEW "LIFEFIT"."V_VIDEO_SESION";
@@ -61,9 +62,10 @@ DROP MATERIALIZED VIEW "LIFEFIT"."VM_EJERCICIOS";
  NOCOMPRESS LOGGING
   TABLESPACE "TS_LIFEFIT" ;
   GRANT DELETE ON "LIFEFIT"."CITA" TO "R_ENTRENADOR";
-  GRANT INSERT ON "LIFEFIT"."CITA" TO "R_ENTRENADOR";
   GRANT SELECT ON "LIFEFIT"."CITA" TO "R_ENTRENADOR";
-  GRANT UPDATE ON "LIFEFIT"."CITA" TO "R_ENTRENADOR";
+  GRANT UPDATE ("FECHAYHORA", "MODALIDAD") ON "LIFEFIT"."CITA" TO "R_ENTRENADOR";
+  GRANT INSERT ON "LIFEFIT"."CITA" TO "R_CLIENTE";
+  
 --------------------------------------------------------
 --  DDL for Table CLIENTE
 --------------------------------------------------------
@@ -339,6 +341,20 @@ DROP MATERIALIZED VIEW "LIFEFIT"."VM_EJERCICIOS";
   SELECT video FROM lifefit.sesión
 ;
   GRANT SELECT ON "LIFEFIT"."V_VIDEO_SESION" TO "R_ENTRENADOR";
+  
+--------------------------------------------------------
+--  DDL for View V_CITA
+--------------------------------------------------------
+
+  create view "V_CITA" as select
+  FECHAYHORA, CITA.ID, MODALIDAD
+  from CITA join USUARIO on "LIFEFIT"."CITA"."CLIENTE_ID" = "LIFEFIT"."USUARIO"."ID"
+  where usuariooracle = user;
+
+  grant select on "V_CITA" to "R_CLIENTE";
+  grant delete on "V_CITA" to "R_CLIENTE";
+  grant update on "V_CITA" to "R_CLIENTE";
+  
 --------------------------------------------------------
 --  DDL for Materialized View VM_EJERCICIOS
 --------------------------------------------------------
