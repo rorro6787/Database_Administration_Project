@@ -294,7 +294,6 @@ END;
   PCTFREE 10 PCTUSED 40 INITRANS 1 MAXTRANS 255 
  NOCOMPRESS LOGGING
   TABLESPACE "TS_LIFEFIT" ;
-  GRANT UPDATE ON "LIFEFIT"."SESIÓN" TO "R_CLIENTE";
   GRANT DELETE ON "LIFEFIT"."SESIÓN" TO "R_ENTRENADOR";
   GRANT SELECT ON "LIFEFIT"."SESIÓN" TO "R_ENTRENADOR";
   GRANT INSERT ON "LIFEFIT"."SESIÓN" TO "R_ENTRENADOR";
@@ -363,6 +362,20 @@ END;
   grant delete on "V_CITA" to "R_CLIENTE";
   grant update on "V_CITA" to "R_CLIENTE";
   
+--------------------------------------------------------
+--  DDL for View V_SESION
+--------------------------------------------------------
+  
+  create view "V_SESION" as select
+  INICIO, FIN, PRESENCIAL, DESCRIPCIÓN, VIDEO, DATOSSALUD, OBJETIVO, PREFERENCIAS
+  from SESIÓN join USUARIO on SESIÓN.PLAN_ENTRENA_CLIENTE_ID = USUARIO.ID join CLIENTE on USUARIO.ID = CLIENTE.ID
+  where usuariooracle = user;
+  
+  grant select on "V_SESION" to "R_CLIENTE";
+  grant update on "V_SESION" to R_CLIENTE;
+  grant delete on "V_SESION" to "R_CLIENTE";
+  grant insert on "V_SESION" to R_CLIENTE;
+
 --------------------------------------------------------
 --  DDL for Materialized View VM_EJERCICIOS
 --------------------------------------------------------
