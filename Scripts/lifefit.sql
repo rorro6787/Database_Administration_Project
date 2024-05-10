@@ -18,10 +18,22 @@ DROP TABLE "LIFEFIT"."RUTINA" cascade constraints;
 DROP TABLE "LIFEFIT"."SESIÓN" cascade constraints;
 DROP TABLE "LIFEFIT"."USUARIO" cascade constraints;
 DROP VIEW "LIFEFIT"."V_CORREO_USUARIO";
+DROP VIEW "LIFEFIT"."V_CITA";
 DROP VIEW "LIFEFIT"."VEJERCICIO";
 DROP VIEW "LIFEFIT"."V_OBJETIVO_CLIENTE";
 DROP VIEW "LIFEFIT"."V_VIDEO_SESION";
+DROP VIEW "LIFEFIT"."V_SESION";
+DROP VIEW "LIFEFIT"."V_DATOS_CLIENTE";
+DROP VIEW "LIFEFIT"."V_VIDEOS";
 DROP MATERIALIZED VIEW "LIFEFIT"."VM_EJERCICIOS";
+BEGIN
+  DBMS_RLS.DROP_POLICY (
+    object_schema    => 'LIFEFIT',
+    object_name      => 'SESIÓN',
+    policy_name      => 'POL_SESION'
+  );
+END;
+/
 --------------------------------------------------------
 --  DDL for Sequence SEQ_EJERCICIOS
 --------------------------------------------------------
@@ -33,9 +45,9 @@ DROP MATERIALIZED VIEW "LIFEFIT"."VM_EJERCICIOS";
 
   CREATE TABLE "LIFEFIT"."CENTRO" 
    (	"ID" NUMBER, 
-	"NOMBRE" VARCHAR2(40 BYTE), 
-	"DIRECCIÓN" VARCHAR2(60 BYTE), 
-	"CÓDIGOPOSTAL" VARCHAR2(20 BYTE)
+	"NOMBRE" VARCHAR2(40 BYTE) ENCRYPT, 
+	"DIRECCIÓN" VARCHAR2(60 BYTE) ENCRYPT, 
+	"CÓDIGOPOSTAL" VARCHAR2(20 BYTE) ENCRYPT
    ) SEGMENT CREATION IMMEDIATE 
   PCTFREE 10 PCTUSED 40 INITRANS 1 MAXTRANS 255 
  NOCOMPRESS LOGGING
@@ -61,9 +73,10 @@ DROP MATERIALIZED VIEW "LIFEFIT"."VM_EJERCICIOS";
  NOCOMPRESS LOGGING
   TABLESPACE "TS_LIFEFIT" ;
   GRANT DELETE ON "LIFEFIT"."CITA" TO "R_ENTRENADOR";
-  GRANT INSERT ON "LIFEFIT"."CITA" TO "R_ENTRENADOR";
   GRANT SELECT ON "LIFEFIT"."CITA" TO "R_ENTRENADOR";
-  GRANT UPDATE ON "LIFEFIT"."CITA" TO "R_ENTRENADOR";
+  GRANT UPDATE ("FECHAYHORA", "MODALIDAD") ON "LIFEFIT"."CITA" TO "R_ENTRENADOR";
+  GRANT INSERT ON "LIFEFIT"."CITA" TO "R_CLIENTE";
+  
 --------------------------------------------------------
 --  DDL for Table CLIENTE
 --------------------------------------------------------
@@ -248,6 +261,7 @@ DROP MATERIALIZED VIEW "LIFEFIT"."VM_EJERCICIOS";
   GRANT DELETE ON "LIFEFIT"."PLAN" TO "R_ENTRENADOR";
   GRANT INSERT ON "LIFEFIT"."PLAN" TO "R_ENTRENADOR";
   GRANT UPDATE ON "LIFEFIT"."PLAN" TO "R_ENTRENADOR";
+  GRANT SELECT ON "LIFEFIT"."PLAN" TO "R_ENTRENADOR";
 --------------------------------------------------------
 --  DDL for Table RUTINA
 --------------------------------------------------------
@@ -283,7 +297,10 @@ DROP MATERIALIZED VIEW "LIFEFIT"."VM_EJERCICIOS";
   PCTFREE 10 PCTUSED 40 INITRANS 1 MAXTRANS 255 
  NOCOMPRESS LOGGING
   TABLESPACE "TS_LIFEFIT" ;
-  GRANT UPDATE ON "LIFEFIT"."SESIÓN" TO "R_CLIENTE";
+  GRANT DELETE ON "LIFEFIT"."SESIÓN" TO "R_ENTRENADOR";
+  GRANT SELECT ON "LIFEFIT"."SESIÓN" TO "R_ENTRENADOR";
+  GRANT INSERT ON "LIFEFIT"."SESIÓN" TO "R_ENTRENADOR";
+  GRANT UPDATE ON "LIFEFIT"."SESIÓN" TO "R_ENTRENADOR";
 --------------------------------------------------------
 --  DDL for Table USUARIO
 --------------------------------------------------------
@@ -334,6 +351,52 @@ DROP MATERIALIZED VIEW "LIFEFIT"."VM_EJERCICIOS";
   SELECT video FROM lifefit.sesión
 ;
   GRANT SELECT ON "LIFEFIT"."V_VIDEO_SESION" TO "R_ENTRENADOR";
+  
+--------------------------------------------------------
+--  DDL for View V_CITA
+--------------------------------------------------------
+
+  create view "V_CITA" as select
+  FECHAYHORA, CITA.ID, MODALIDAD
+  from CITA join USUARIO on "LIFEFIT"."CITA"."CLIENTE_ID" = "LIFEFIT"."USUARIO"."ID"
+  where usuariooracle = user;
+
+  grant select on "V_CITA" to "R_CLIENTE";
+  grant delete on "V_CITA" to "R_CLIENTE";
+  grant update on "V_CITA" to "R_CLIENTE";
+  
+--------------------------------------------------------
+--  DDL for View V_SESION
+--------------------------------------------------------
+  
+  create view "V_SESION" as select
+  INICIO, FIN, PRESENCIAL, DESCRIPCIÓN, VIDEO, DATOSSALUD, OBJETIVO, PREFERENCIAS
+  from SESIÓN join USUARIO on SESIÓN.PLAN_ENTRENA_CLIENTE_ID = USUARIO.ID join CLIENTE on USUARIO.ID = CLIENTE.ID
+  where usuariooracle = user;
+  
+  grant select on "V_SESION" to "R_CLIENTE";
+  grant update on "V_SESION" to R_CLIENTE;
+  grant delete on "V_SESION" to "R_CLIENTE";
+  grant insert on "V_SESION" to R_CLIENTE;
+
+--------------------------------------------------------
+--  DDL for V_VIDEOS
+--------------------------------------------------------
+
+CREATE VIEW V_VIDEOS AS
+SELECT VIDEO FROM SESION JOIN USUARIO ON (USUARIO.ID = SESION.PLAN_ENTRENA_ID1) WHERE USUARIO.USUARIOORACLE = USER;
+GRANT SELECT ON V_VIDEOS TO R_ENTRENADOR;
+
+--------------------------------------------------------
+--  DDL for V_DATOS_CLIENTE
+--------------------------------------------------------
+
+CREATE VIEW V_DATOS_CLIENTE AS
+SELECT SESION.INICIO, SESION.FIN, SESION.DESCRIPCION, SESION.DATOSSALUD, CLIENTE.OBJETIVO
+FROM SESION JOIN USUARIO ON (USUARIO.ID = SESION.PLAN_ENTRENA_ID1) JOIN CLIENTE ON (CLIENTE.ID = SESION.PLAN_ENTRENA_CLIENTE_ID) 
+WHERE USUARIO.USUARIOORACLE = USER;
+GRANT SELECT ON V_DATOS_CLIENTE TO R_ENTRENADOR;
+
 --------------------------------------------------------
 --  DDL for Materialized View VM_EJERCICIOS
 --------------------------------------------------------
@@ -353,25 +416,15 @@ DROP MATERIALIZED VIEW "LIFEFIT"."VM_EJERCICIOS";
   PCTINCREASE 0
   BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)) 
   BUILD IMMEDIATE
-  USING INDEX 
-  REFRESH FORCE ON DEMAND START WITH sysdate+0 NEXT TRUNC(SYSDATE) + 1
-  USING DEFAULT LOCAL ROLLBACK SEGMENT
-  USING ENFORCED CONSTRAINTS DISABLE ON QUERY COMPUTATION DISABLE QUERY REWRITE
-  AS SELECT "EJERCICIO"."ID" "ID","EJERCICIO"."NOMBRE" "NOMBRE","EJERCICIO"."DESCRIPCIÓN" "DESCRIPCIÓN","EJERCICIO"."VÍDEO" "VÍDEO","EJERCICIO"."IMAGEN" "IMAGEN" FROM "EJERCICIO" "EJERCICIO";
-
-  CREATE UNIQUE INDEX "LIFEFIT"."SYS_IL0000087268C00005$$" ON "LIFEFIT"."VM_EJERCICIOS" (
-  PCTFREE 10 INITRANS 2 MAXTRANS 255 
+  USING INDEX PCTFREE 10 INITRANS 2 MAXTRANS 255 
   STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
   PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
   BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
   TABLESPACE "TS_LIFEFIT" 
-  PARALLEL (DEGREE 0 INSTANCES 0) ;
-  CREATE UNIQUE INDEX "LIFEFIT"."SYS_C_SNAP$_1EJERCICIO_PK" ON "LIFEFIT"."VM_EJERCICIOS" ("ID") 
-  PCTFREE 10 INITRANS 2 MAXTRANS 255 COMPUTE STATISTICS 
-  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
-  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
-  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
-  TABLESPACE "TS_LIFEFIT" ;
+  REFRESH FORCE ON DEMAND START WITH sysdate+0 NEXT TRUNC(SYSDATE) + 1
+  WITH PRIMARY KEY USING DEFAULT LOCAL ROLLBACK SEGMENT
+  USING ENFORCED CONSTRAINTS DISABLE ON QUERY COMPUTATION DISABLE QUERY REWRITE
+  AS SELECT "EJERCICIO"."ID" "ID","EJERCICIO"."NOMBRE" "NOMBRE","EJERCICIO"."DESCRIPCIÓN" "DESCRIPCIÓN","EJERCICIO"."VÍDEO" "VÍDEO","EJERCICIO"."IMAGEN" "IMAGEN" FROM "EJERCICIO" "EJERCICIO";
 
    COMMENT ON MATERIALIZED VIEW "LIFEFIT"."VM_EJERCICIOS"  IS 'snapshot table for snapshot LIFEFIT.VM_EJERCICIOS';
 REM INSERTING into LIFEFIT.CENTRO
@@ -428,16 +481,6 @@ Insert into LIFEFIT.EJERCICIO (ID,NOMBRE,"DESCRIPCIÓN","VÍDEO",PUBLICO) values
 Insert into LIFEFIT.EJERCICIO (ID,NOMBRE,"DESCRIPCIÓN","VÍDEO",PUBLICO) values ('10','Plancha Lateral','Ejercicio para trabajar los músculos abdominales, oblicuos y estabilizadores del core. Acuéstate de lado apoyándote en el antebrazo y el costado del pie, mantén el cuerpo en línea recta y sostén la posición durante el tiempo deseado.','https://www.youtube.com/watch?v=zf0RBDYF8iE','S');
 REM INSERTING into LIFEFIT.EJERCICIOS_EXT
 SET DEFINE OFF;
-Insert into LIFEFIT.EJERCICIOS_EXT (EJERCICIO,DESCRIPCION,ENLACEALVIDEO) values ('Sentadillas','Ejercicio básico para fortalecer las piernas. Párate con los pies separados al ancho de los hombros y baja el cuerpo doblando las rodillas, manteniendo la espalda recta. Luego, vuelve a la posición inicial.','https://www.youtube.com/watch?v=QKKZ9AGYTi4');
-Insert into LIFEFIT.EJERCICIOS_EXT (EJERCICIO,DESCRIPCION,ENLACEALVIDEO) values ('Flexiones de Brazos','Ejercicio para fortalecer los músculos del pecho, hombros y tríceps. Apóyate en el suelo con las manos a la altura de los hombros, manteniendo el cuerpo recto y descendiendo hasta que los codos estén en un ángulo de 90 grados','https://www.youtube.com/watch?v=UwRLWMcOdwI');
-Insert into LIFEFIT.EJERCICIOS_EXT (EJERCICIO,DESCRIPCION,ENLACEALVIDEO) values ('Plancha Abdominal','Ejercicio de isometría para fortalecer el core. Colócate en posición de plancha, apoyando el peso en los antebrazos y los dedos de los pies, manteniendo el cuerpo recto y los músculos abdominales contraídos.','https://www.youtube.com/watch?v=TvxNkmjdhMM');
-Insert into LIFEFIT.EJERCICIOS_EXT (EJERCICIO,DESCRIPCION,ENLACEALVIDEO) values ('Levantamiento de Pesas','Ejercicio de fuerza que se puede adaptar a diferentes grupos musculares. Utiliza pesas adecuadas para tu nivel de fuerza, mantén una postura adecuada y realiza movimientos controlados para evitar lesiones.','https://www.youtube.com/watch?v=qEwKCR5JCog');
-Insert into LIFEFIT.EJERCICIOS_EXT (EJERCICIO,DESCRIPCION,ENLACEALVIDEO) values ('Burpees','Ejercicio que combina flexiones, saltos y sentadillas. Comienza en posición de cuclillas, luego apoya las manos en el suelo, estira las piernas hacia atrás realizando una flexión, lleva las piernas de vuelta a la posición de cuclillas y salta','https://www.youtube.com/watch?v=JZQA08SlJnM');
-Insert into LIFEFIT.EJERCICIOS_EXT (EJERCICIO,DESCRIPCION,ENLACEALVIDEO) values ('Dominadas','Ejercicio para fortalecer la espalda y los brazos. Agárrate a una barra con las manos separadas al ancho de los hombros y levántate hasta que la barbilla esté por encima de la barra. Luego, baja lentamente hasta la posición inicial.','https://www.youtube.com/watch?v=eGo4IYlbE5g');
-Insert into LIFEFIT.EJERCICIOS_EXT (EJERCICIO,DESCRIPCION,ENLACEALVIDEO) values ('Zancadas','Ejercicio para fortalecer las piernas y glúteos. Da un paso adelante con una pierna y flexiona ambas rodillas hasta que las piernas formen ángulos de 90 grados. Luego, vuelve a la posición inicial y repite con la otra pierna.','https://www.youtube.com/watch?v=QOVaHwm-Q6U');
-Insert into LIFEFIT.EJERCICIOS_EXT (EJERCICIO,DESCRIPCION,ENLACEALVIDEO) values ('Flexiones Diamante','Variante de las flexiones que enfatiza más en los tríceps. Coloca las manos juntas debajo del pecho, formando un diamante con los pulgares y los índices. Realiza las flexiones manteniendo los codos cerca del cuerpo.','https://www.youtube.com/watch?v=Jx4cT2Ny8Mg');
-Insert into LIFEFIT.EJERCICIOS_EXT (EJERCICIO,DESCRIPCION,ENLACEALVIDEO) values ('Elevaciones Laterales','Ejercicio para fortalecer los hombros y los músculos del deltoides medio. De pie, con una mancuerna en cada mano, levanta los brazos hacia los lados hasta que estén paralelos al suelo, luego baja lentamente.','https://www.youtube.com/watch?v=yho0e_9rOwA');
-Insert into LIFEFIT.EJERCICIOS_EXT (EJERCICIO,DESCRIPCION,ENLACEALVIDEO) values ('Plancha Lateral','Ejercicio para trabajar los músculos abdominales, oblicuos y estabilizadores del core. Acuéstate de lado apoyándote en el antebrazo y el costado del pie, mantén el cuerpo en línea recta y sostén la posición durante el tiempo deseado.','https://www.youtube.com/watch?v=zf0RBDYF8iE');
 REM INSERTING into LIFEFIT.ELEMENTOCALENDARIO
 SET DEFINE OFF;
 REM INSERTING into LIFEFIT.ENTRENA
@@ -871,18 +914,30 @@ ALTER TRIGGER "LIFEFIT"."TR_EJERCICIO" ENABLE;
   ALTER TABLE "LIFEFIT"."SESIÓN" ADD CONSTRAINT "SESIÓN_PLAN_FK" FOREIGN KEY ("PLAN_INICIO", "PLAN_ENTRENA_CLIENTE_ID", "PLAN_ENTRENA_ID1", "PLAN_RUTINA_ID")
 	  REFERENCES "LIFEFIT"."PLAN" ("INICIO", "ENTRENA_CLIENTE_ID", "ENTRENA_ID1", "RUTINA_ID") ENABLE;
 
-
 --------------------------------------------------------
---  P3 Parte 2
+--  DDL for Security Mecanism for clients training sessions visualization
 --------------------------------------------------------
 
-CREATE OR REPLACE VIEW V_VIDEOS AS
-SELECT VIDEO FROM SESION JOIN USUARIO ON (USUARIO.ID = SESION.PLAN_ENTRENA_ID1) WHERE USUARIO.USUARIOORACLE = USER;
-GRANT SELECT ON V_VIDEOS TO R_ENTRENADOR;
+create or replace function vpd_function(p_schema varchar2, p_obj varchar2)
+  Return varchar2
+is
+  Vusuario VARCHAR2(100);
+  client_id NUMBER;
+Begin
+  Vusuario := SYS_CONTEXT('userenv', 'SESSION_USER');
+  select id into client_id from usuario where usuariooracle = Vusuario; 
+  
+  return 'plan_entrena_cliente_id = ' || client_id;
+End;
+/
 
-
-CREATE OR REPLACE VIEW V_DATOS_CLIENTE AS
-SELECT SESION.INICIO, SESION.FIN, SESION.DESCRIPCION, SESION.DATOSSALUD, CLIENTE.OBJETIVO
-FROM SESION JOIN USUARIO ON (USUARIO.ID = SESION.PLAN_ENTRENA_ID1) JOIN CLIENTE ON (CLIENTE.ID = SESION.PLAN_ENTRENA_CLIENTE_ID) 
-WHERE USUARIO.USUARIOORACLE = USER;
-GRANT SELECT ON V_DATOS_CLIENTE TO R_ENTRENADOR;
+BEGIN dbms_rls.add_policy (
+	object_schema=>'LIFEFIT',                  
+	object_name=>'SESIÓN',                 
+	policy_name=>'POL_SESION',              
+	function_schema=>'LIFEFIT',              
+	policy_function=>'VPD_FUNCTION',          
+	statement_types=>'SELECT'  
+);
+end;
+/
