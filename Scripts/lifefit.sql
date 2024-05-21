@@ -1,6 +1,14 @@
 --------------------------------------------------------
 -- Archivo creado  - lunes-abril-29-2024   
 --------------------------------------------------------
+BEGIN
+  DBMS_RLS.DROP_POLICY (
+    object_schema    => 'LIFEFIT',
+    object_name      => 'SESIÓN',
+    policy_name      => 'POL_SESION'
+  );
+END;
+/
 DROP SEQUENCE "LIFEFIT"."SEQ_EJERCICIOS";
 DROP TABLE "LIFEFIT"."CENTRO" cascade constraints;
 DROP TABLE "LIFEFIT"."CITA" cascade constraints;
@@ -26,14 +34,7 @@ DROP VIEW "LIFEFIT"."V_SESION";
 DROP VIEW "LIFEFIT"."V_DATOS_CLIENTE";
 DROP VIEW "LIFEFIT"."V_VIDEOS";
 DROP MATERIALIZED VIEW "LIFEFIT"."VM_EJERCICIOS";
-BEGIN
-  DBMS_RLS.DROP_POLICY (
-    object_schema    => 'LIFEFIT',
-    object_name      => 'SESIÓN',
-    policy_name      => 'POL_SESION'
-  );
-END;
-/
+
 --------------------------------------------------------
 --  DDL for Sequence SEQ_EJERCICIOS
 --------------------------------------------------------
@@ -384,7 +385,7 @@ END;
 --------------------------------------------------------
 
 CREATE VIEW V_VIDEOS AS
-SELECT VIDEO FROM SESION JOIN USUARIO ON (USUARIO.ID = SESION.PLAN_ENTRENA_ID1) WHERE USUARIO.USUARIOORACLE = USER;
+SELECT VIDEO FROM SESIÓN JOIN USUARIO ON (USUARIO.ID = SESIÓN.PLAN_ENTRENA_ID1) WHERE USUARIO.USUARIOORACLE = USER;
 GRANT SELECT ON V_VIDEOS TO R_ENTRENADOR;
 
 --------------------------------------------------------
@@ -392,8 +393,8 @@ GRANT SELECT ON V_VIDEOS TO R_ENTRENADOR;
 --------------------------------------------------------
 
 CREATE VIEW V_DATOS_CLIENTE AS
-SELECT SESION.INICIO, SESION.FIN, SESION.DESCRIPCION, SESION.DATOSSALUD, CLIENTE.OBJETIVO
-FROM SESION JOIN USUARIO ON (USUARIO.ID = SESION.PLAN_ENTRENA_ID1) JOIN CLIENTE ON (CLIENTE.ID = SESION.PLAN_ENTRENA_CLIENTE_ID) 
+SELECT SESIÓN.INICIO, SESIÓN.FIN, SESIÓN.DESCRIPCIÓN, SESIÓN.DATOSSALUD, CLIENTE.OBJETIVO
+FROM SESIÓN JOIN USUARIO ON (USUARIO.ID = SESIÓN.PLAN_ENTRENA_ID1) JOIN CLIENTE ON (CLIENTE.ID = SESIÓN.PLAN_ENTRENA_CLIENTE_ID) 
 WHERE USUARIO.USUARIOORACLE = USER;
 GRANT SELECT ON V_DATOS_CLIENTE TO R_ENTRENADOR;
 
