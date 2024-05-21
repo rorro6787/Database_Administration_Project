@@ -36,6 +36,18 @@ DROP VIEW "LIFEFIT"."V_VIDEOS";
 DROP MATERIALIZED VIEW "LIFEFIT"."VM_EJERCICIOS";
 
 --------------------------------------------------------
+--  DDL for Packages
+--------------------------------------------------------
+
+    CREATE OR REPLACE PACKAGE BASE AS 
+    END BASE;
+    /
+    
+    CREATE OR REPLACE PACKAGE ICALC AS 
+    END ICALC;
+    /
+
+--------------------------------------------------------
 --  DDL for Sequence SEQ_EJERCICIOS
 --------------------------------------------------------
 
