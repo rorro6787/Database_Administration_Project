@@ -38,9 +38,20 @@ DROP MATERIALIZED VIEW "LIFEFIT"."VM_EJERCICIOS";
 --------------------------------------------------------
 --  DDL for Packages
 --------------------------------------------------------
+    
+    CREATE OR REPLACE PACKAGE BASE IS
+      -- Excepciones personalizadas
+      EXCEPTION_CREACION EXCEPTION;
+      EXCEPTION_MODIFICACION EXCEPTION;
+      EXCEPTION_ELIMINACION EXCEPTION;
+      EXCEPTION_LECTURA EXCEPTION;
 
-    CREATE OR REPLACE PACKAGE BASE AS 
-    END BASE;
+      -- Pragmática de excepción para la traducción de nombres de excepción en Oracle
+      PRAGMA EXCEPTION_INIT(EXCEPTION_CREACION, -20001);
+      PRAGMA EXCEPTION_INIT(EXCEPTION_MODIFICACION, -20002);
+      PRAGMA EXCEPTION_INIT(EXCEPTION_ELIMINACION, -20003);
+      PRAGMA EXCEPTION_INIT(EXCEPTION_LECTURA, -20004);
+    END Base;
     /
     
     CREATE OR REPLACE PACKAGE ICALC AS 
