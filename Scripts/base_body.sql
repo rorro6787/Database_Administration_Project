@@ -13,13 +13,47 @@ PACKAGE BODY BASE AS
   END CREA_GERENTE;
 
   PROCEDURE CREA_ENTRENADOR(
-	        P_DATOS IN TENTRENADOR,
-	        P_USERPASS IN VARCHAR2,
-	        P_USUARIO OUT USUARIO%ROWTYPE,
-	        P_ENTRENADOR OUT ENTRENADOR%ROWTYPE) AS
+    P_DATOS IN TENTRENADOR,
+    P_USERPASS IN VARCHAR2,
+    P_USUARIO OUT USUARIO%ROWTYPE,
+    P_ENTRENADOR OUT ENTRENADOR%ROWTYPE
+  ) AS
+    PRAGMA AUTONOMOUS_TRANSACTION;
+
+    v_usuario_id USUARIO.ID%TYPE;
+    v_entrenador_id ENTRENADOR.ID%TYPE;
+    savepoint_name VARCHAR2(50) := 'SP_CREACION';
+
   BEGIN
-    -- TAREA: Se necesita implantación para PROCEDURE BASE.CREA_ENTRENADOR
-    NULL;
+    -- Savepoint
+    SAVEPOINT savepoint_name;
+   
+    BEGIN
+        -- Insert into USUARIO
+        INSERT INTO USUARIO (ID,NOMBRE, APELLIDOS, TELEFONO, DIRECCION, CORREO,USUARIOORACLE)
+        VALUES (seq_usuario_id.nextval,P_DATOS.NOMBRE, P_DATOS.APELLIDOS, P_DATOS.TELEFONO, P_DATOS.DIRECCION, P_DATOS.CORREOE, P_DATOS.NOMBRE || seq_usuario_id.currval )
+        RETURNING ID INTO v_usuario_id;
+       
+        -- Insert into ENTRENADOR
+        INSERT INTO ENTRENADOR (ID, DISPONIBILIDAD, CENTRO_ID)
+        VALUES (v_usuario_id, P_DATOS.DISPONIBILIDAD, P_DATOS.CENTRO)
+        RETURNING ID INTO v_entrenador_id;
+
+        -- Create database user and assign privileges
+        create_db_user(P_DATOS.NOMBRE || seq_usuario_id.currval, P_USERPASS);
+
+        -- Commit autonomous transaction
+        COMMIT;
+
+        -- Retrieve inserted records
+        SELECT * INTO P_USUARIO FROM USUARIO WHERE ID = v_usuario_id;
+        SELECT * INTO P_ENTRENADOR FROM ENTRENADOR WHERE ID = v_entrenador_id;
+
+    EXCEPTION
+        WHEN EXCEPTION_CREACION THEN
+            ROLLBACK TO savepoint_name;
+            RAISE;
+    END;
   END CREA_ENTRENADOR;
 
   PROCEDURE CREA_CLIENTE(
