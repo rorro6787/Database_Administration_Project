@@ -24,8 +24,15 @@ CREATE ROLE r_entrenador_nutricion;
 CREATE ROLE r_cliente;
 CREATE ROLE r_administrador;
 
-GRANT DBA TO r_administrador;
-GRANT r_administrador TO lifefit;
+GRANT RESOURCE TO r_administrador WITH ADMIN OPTION;
+GRANT CREATE USER TO r_administrador WITH ADMIN OPTION;
+GRANT CONNECT TO r_administrador WITH ADMIN OPTION;
+GRANT r_administrador TO LIFEFIT WITH ADMIN OPTION;
+GRANT r_gerente TO LIFEFIT WITH ADMIN OPTION;
+GRANT r_entrenador TO LIFEFIT WITH ADMIN OPTION;
+GRANT r_entrenador_nutricion TO LIFEFIT WITH ADMIN OPTION;
+GRANT r_cliente TO LIFEFIT WITH ADMIN OPTION;
+
 
 GRANT READ, WRITE ON DIRECTORY directorio_ext TO lifefit; 
 ALTER USER LIFEFIT QUOTA 50M ON TS_INDICES;
