@@ -35,7 +35,7 @@ PACKAGE BODY BASE AS
     
   EXCEPTION 
     WHEN OTHERS THEN
-        RAISE_APPLICATION_ERROR(-20001, 'Error al crear cliente. Detalles: ' || SQLERRM);
+        RAISE_APPLICATION_ERROR(-20001, 'Error al crear entrenador. Detalles: ' || SQLERRM);
   END CREA_ENTRENADOR;
 
   PROCEDURE CREA_CLIENTE(
