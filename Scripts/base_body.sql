@@ -65,8 +65,10 @@ PACKAGE BODY BASE AS
 
   PROCEDURE ELIMINA_USER(P_ID USUARIO.ID%TYPE) AS
   BEGIN
-    -- TAREA: Se necesita implantación para PROCEDURE BASE.ELIMINA_USER
-    NULL;
+    UPDATE USUARIO SET USUARIOORACLE = NULL WHERE id = p_id;
+    IF SQL%ROWCOUNT = 0 THEN
+        RAISE_APPLICATION_ERROR(-20002, 'Error al eliminar infraestructura del usuario. Detalles: Usuario con ID = ' || p_id || ', no encontrado en la tabla Usuario');
+    END IF;
   END ELIMINA_USER;
 
   PROCEDURE ELIMINA_CLIENTE(P_ID USUARIO.ID%TYPE) AS
