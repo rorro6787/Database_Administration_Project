@@ -81,6 +81,9 @@ PACKAGE BODY BASE AS
   BEGIN
     ELIMINA_USER(P_ID);
     DELETE FROM GERENTE WHERE ID = P_ID;
+    IF SQL%ROWCOUNT = 0 THEN
+        RAISE_APPLICATION_ERROR(-20002, 'Error al eliminar infraestructura del gerente. Detalles: Gerente con ID = ' || p_id || ', no encontrado en la tabla Gerente');
+    END IF;
   END ELIMINA_GERENTE;
 
   PROCEDURE ELIMINA_ENTRENADOR(P_ID USUARIO.ID%TYPE) AS
