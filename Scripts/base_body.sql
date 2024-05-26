@@ -82,7 +82,7 @@ PACKAGE BODY BASE AS
     ELIMINA_USER(P_ID);
     DELETE FROM GERENTE WHERE ID = P_ID;
     IF SQL%ROWCOUNT = 0 THEN
-        RAISE_APPLICATION_ERROR(-20002, 'Error al eliminar infraestructura del gerente. Detalles: Gerente con ID = ' || p_id || ', no encontrado en la tabla Gerente');
+        RAISE_APPLICATION_ERROR(-20003, 'Error al eliminar infraestructura del gerente. Detalles: Gerente con ID = ' || p_id || ', no encontrado en la tabla Gerente');
     END IF;
   END ELIMINA_GERENTE;
 
@@ -99,7 +99,7 @@ PACKAGE BODY BASE AS
   BEGIN
     DELETE FROM CENTRO WHERE ID = P_ID;
     IF SQL%ROWCOUNT = 0 THEN
-        RAISE_APPLICATION_ERROR(-20002, 'Error al eliminar infraestructura del centro. Detalles: Centro con ID = ' || p_id || ', no encontrado en la tabla Centro');
+        RAISE_APPLICATION_ERROR(-20003, 'Error al eliminar infraestructura del centro. Detalles: Centro con ID = ' || p_id || ', no encontrado en la tabla Centro');
     END IF;
     FOR gerente_rec IN cur_gerente LOOP
         IF gerente_rec.CENTRO_ID = P_ID THEN
