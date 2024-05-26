@@ -93,9 +93,29 @@ PACKAGE BODY BASE AS
   END ELIMINA_ENTRENADOR;
 
   PROCEDURE ELIMINA_CENTRO(P_ID CENTRO.ID%TYPE) AS
+    CURSOR cur_gerente IS SELECT ID, CENTRO_ID FROM GERENTE;
+    CURSOR cur_entrenador IS SELECT ID, CENTRO_ID FROM GERENTE;
+    CURSOR cur_cliente IS SELECT ID, CENTRO_ID FROM GERENTE;
   BEGIN
-    -- TAREA: Se necesita implantación para PROCEDURE BASE.ELIMINA_CENTRO
-    NULL;
+    DELETE FROM CENTRO WHERE ID = P_ID;
+    IF SQL%ROWCOUNT = 0 THEN
+        RAISE_APPLICATION_ERROR(-20002, 'Error al eliminar infraestructura del centro. Detalles: Centro con ID = ' || p_id || ', no encontrado en la tabla Centro');
+    END IF;
+    FOR gerente_rec IN cur_gerente LOOP
+        IF gerente_rec.CENTRO_ID = P_ID THEN
+            ELIMINA_GERENTE(gerente_rec.ID);
+        END IF;
+    END LOOP;
+    FOR entrenador_rec IN cur_entrenador LOOP
+        IF entrenador_rec.CENTRO_ID = P_ID THEN
+            ELIMINA_ENTRENADOR(entrenador_rec.ID);
+        END IF;
+    END LOOP;
+    FOR cliente_rec IN cur_cliente LOOP
+        IF cliente_rec.CENTRO_ID = P_ID THEN
+            ELIMINA_CLIENTE(cliente_rec.ID);
+        END IF;
+    END LOOP;
   END ELIMINA_CENTRO;
 
   PROCEDURE EJECUTAR_SQL(ACCION1 IN VARCHAR2, ACCION2 IN VARCHAR2) AS
