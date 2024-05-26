@@ -116,6 +116,16 @@ PACKAGE BODY BASE AS
             ELIMINA_CLIENTE(cliente_rec.ID);
         END IF;
     END LOOP;
+    /*
+    COMMIT;
+    */
+  /*
+  EXCEPTION
+    WHEN OTHERS THEN
+      -- Realizar rollback si ocurre cualquier error
+      ROLLBACK;
+      RAISE;  -- Re-lanzar la excepción para manejarla en un nivel superior
+  */
   END ELIMINA_CENTRO;
 
   PROCEDURE EJECUTAR_SQL(ACCION1 IN VARCHAR2, ACCION2 IN VARCHAR2) AS
