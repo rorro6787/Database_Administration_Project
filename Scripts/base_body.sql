@@ -78,9 +78,24 @@ PACKAGE BODY BASE AS
   END ELIMINA_CLIENTE;
 
   PROCEDURE ELIMINA_GERENTE(P_ID USUARIO.ID%TYPE) AS
+    v_usuario_oracle VARCHAR2(100);
   BEGIN
-    -- TAREA: Se necesita implantación para PROCEDURE BASE.ELIMINA_GERENTE
-    NULL;
+      SELECT USUARIOORACLE INTO v_usuario_oracle
+      FROM USUARIO
+      WHERE ID = P_ID;
+  
+    DELETE FROM GERENTE
+    WHERE ID = P_ID;
+    
+    DELETE FROM USUARIO
+    WHERE ID = P_ID;
+    
+    BEGIN
+        EXECUTE IMMEDIATE 'DROP USER ' || v_usuario_oracle || ' CASCADE';
+        EXCEPTION
+        WHEN OTHERS THEN
+            RAISE_APPLICATION_ERROR(-20005, 'Error al eliminar el usuario Oracle. Detalles: ' || SQLERRM);
+    END;
   END ELIMINA_GERENTE;
 
   PROCEDURE ELIMINA_ENTRENADOR(P_ID USUARIO.ID%TYPE) AS
