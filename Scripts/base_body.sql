@@ -137,7 +137,7 @@ PACKAGE BODY BASE AS
     v_count INTEGER;
   BEGIN
     
-    SELECT COUNT(*)INTO v_count FROM CENTRO WHERE ID = p_id;
+    SELECT COUNT(*) INTO v_count FROM CENTRO WHERE ID = p_id;
 
     IF v_count = 0 THEN
         RAISE_APPLICATION_ERROR(-20003, 'Error al eliminar infraestructura del centro. Detalles: Centro con ID = ' || p_id || ', no encontrado en la tabla Centro');
@@ -158,9 +158,6 @@ PACKAGE BODY BASE AS
         END IF;
     END LOOP;
     DELETE FROM CENTRO WHERE ID = P_ID;
-  EXCEPTION
-    WHEN OTHERS THEN
-      RAISE;
   END ELIMINA_CENTRO;
 
   PROCEDURE EJECUTAR_SQL(ACCION IN VARCHAR2) AS
