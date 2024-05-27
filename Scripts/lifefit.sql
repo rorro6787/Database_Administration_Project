@@ -1,6 +1,9 @@
 --------------------------------------------------------
 -- Archivo creado  - lunes-abril-29-2024   
 --------------------------------------------------------
+DROP USER PRUEBA_ENTRENADOR1000;
+DROP USER PRUEBA_CLIENTE1001;
+DROP USER PRUEBA_GERENTE1002;
 DROP SEQUENCE "LIFEFIT"."SEQ_EJERCICIOS";
 DROP SEQUENCE "LIFEFIT"."SEQ_USUARIOS";
 DROP TABLE "LIFEFIT"."CENTRO" cascade constraints;
@@ -574,13 +577,7 @@ grant select on "VEJERCICIO" to "R_GERENTE";
   CREATE UNIQUE INDEX "LIFEFIT"."CONFORMAN_PK" ON "LIFEFIT"."CONFORMAN" ("RUTINA_ID", "EJERCICIO_ID") 
   PCTFREE 10 INITRANS 2 MAXTRANS 255 COMPUTE STATISTICS 
   TABLESPACE "TS_INDICES" ;
---------------------------------------------------------
---  DDL for Index DIETA_NOMBRE_UN
---------------------------------------------------------
 
-  CREATE UNIQUE INDEX "LIFEFIT"."DIETA_NOMBRE_UN" ON "LIFEFIT"."DIETA" ("NOMBRE") 
-  PCTFREE 10 INITRANS 2 MAXTRANS 255 COMPUTE STATISTICS 
-  TABLESPACE "TS_INDICES" ;
 --------------------------------------------------------
 --  DDL for Index DIETA_PK
 --------------------------------------------------------
@@ -787,11 +784,9 @@ ALTER TRIGGER "LIFEFIT"."TR_EJERCICIO" ENABLE;
 --------------------------------------------------------
 
   ALTER TABLE "LIFEFIT"."DIETA" MODIFY ("ID" NOT NULL ENABLE);
-  ALTER TABLE "LIFEFIT"."DIETA" MODIFY ("NOMBRE" NOT NULL ENABLE);
   ALTER TABLE "LIFEFIT"."DIETA" ADD CONSTRAINT "DIETA_PK" PRIMARY KEY ("ID")
   USING INDEX "LIFEFIT"."DIETA_PK"  ENABLE;
-  ALTER TABLE "LIFEFIT"."DIETA" ADD CONSTRAINT "DIETA_NOMBRE_UN" UNIQUE ("NOMBRE")
-  USING INDEX "LIFEFIT"."DIETA_NOMBRE_UN"  ENABLE;
+  
 --------------------------------------------------------
 --  Constraints for Table ENTRENADOR
 --------------------------------------------------------
