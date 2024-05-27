@@ -1032,9 +1032,10 @@ End;
 
     SET SERVEROUTPUT ON;
 
- -----------------------------------------------------------------------------------------------------------------------------------------------------------
-    --PRUEBA PROCEDIMIENTOS
+     -----------------------------------------------------------------------------------------------------------------------------------------------------------
+    --INSERCIÓN DATOS PARA PROBAR PROCEDIMIENTOS DE BASEBODY
     -----------------------------------------------------------------------------------------------------------------------------------------------------------
+   
     --CREACION CENTRO
     INSERT INTO CENTRO (ID,NOMBRE, DIRECCIÓN, CÓDIGOPOSTAL)
     VALUES (1000, 'PRUEBA','PRUEBA@CENTRO.COM','POSTALPRUEBA');
@@ -1116,8 +1117,10 @@ End;
     INSERT INTO CONFORMAN (SERIES, REPETICIONES,DURACIÓN,RUTINA_ID,EJERCICIO_ID)
     VALUES ('','','',1000,1000);
     
-    --COMPROBACIONES
-    
+    -----------------------------------------------------------------------------------------------------------------------------------------------------------
+    --COMPROBACIONES DE RESULTADOS DE PROCEDIMIENTOS DE BASEBODY
+    ----------------------------------------------------------------------------------------------------------------------------------------------------------
+                 
     SELECT * FROM ALL_USERS WHERE USERNAME LIKE '%PRUEBA_%';
     
     SELECT * FROM CENTRO WHERE ID = 1000;
@@ -1137,4 +1140,3 @@ End;
     --SELECT * FROM DIETA WHERE ID = 1000;
     --SELECT * FROM EJERCICIO WHERE ID = 1000;
     --SELECT * FROM RUTINA WHERE ID = 1000;
-    
