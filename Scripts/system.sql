@@ -24,8 +24,43 @@ CREATE ROLE r_entrenador_nutricion;
 CREATE ROLE r_cliente;
 CREATE ROLE r_administrador;
 
-GRANT DBA TO r_administrador;
-GRANT r_administrador TO lifefit;
+GRANT DROP USER TO LIFEFIT;
+GRANT CREATE USER TO LIFEFIT WITH ADMIN OPTION;
+GRANT CREATE ANY SYNONYM TO LIFEFIT WITH ADMIN OPTION;
+
+GRANT RESOURCE TO r_administrador WITH ADMIN OPTION;
+GRANT CONNECT TO r_administrador WITH ADMIN OPTION;
+GRANT CREATE VIEW TO r_administrador;
+GRANT CREATE MATERIALIZED VIEW TO r_administrador;
+GRANT CREATE TABLE TO r_administrador;
+
+GRANT r_administrador TO LIFEFIT WITH ADMIN OPTION;
+GRANT r_gerente TO LIFEFIT WITH ADMIN OPTION;
+GRANT r_entrenador TO LIFEFIT WITH ADMIN OPTION;
+GRANT r_entrenador_nutricion TO LIFEFIT WITH ADMIN OPTION;
+GRANT r_cliente TO LIFEFIT WITH ADMIN OPTION;
 
 GRANT READ, WRITE ON DIRECTORY directorio_ext TO lifefit; 
 ALTER USER LIFEFIT QUOTA 50M ON TS_INDICES;
+
+// Esto se ejecuta cuando el esquema ya está creado en Lifefit
+
+BEGIN
+  DBMS_RLS.DROP_POLICY (
+    object_schema    => 'LIFEFIT',
+    object_name      => 'SESIÓN',
+    policy_name      => 'POL_SESION'
+  );
+END;
+/
+	
+BEGIN dbms_rls.add_policy (
+	object_schema=>'LIFEFIT',                  
+	object_name=>'SESIÓN',                 
+	policy_name=>'POL_SESION',              
+	function_schema=>'LIFEFIT',              
+	policy_function=>'VPD_FUNCTION',          
+	statement_types=>'SELECT'  
+);
+end;
+/
