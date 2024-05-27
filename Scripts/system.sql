@@ -42,3 +42,15 @@ GRANT DROP USER TO LIFEFIT;
 
 GRANT READ, WRITE ON DIRECTORY directorio_ext TO lifefit; 
 ALTER USER LIFEFIT QUOTA 50M ON TS_INDICES;
+
+// Esto se ejecuta cuando el esquema ya está creado en Lifefit
+BEGIN dbms_rls.add_policy (
+	object_schema=>'LIFEFIT',                  
+	object_name=>'SESIÓN',                 
+	policy_name=>'POL_SESION',              
+	function_schema=>'LIFEFIT',              
+	policy_function=>'VPD_FUNCTION',          
+	statement_types=>'SELECT'  
+);
+end;
+/
