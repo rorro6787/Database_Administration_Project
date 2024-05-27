@@ -105,15 +105,12 @@ PACKAGE BODY BASE AS
 
   PROCEDURE ELIMINA_CLIENTE(P_ID USUARIO.ID%TYPE) AS
     BEGIN
-        DELETE FROM CITA WHERE CLIENTE_ID = P_ID; 
-        DELETE FROM ENTRENA WHERE CLIENTE_ID = P_ID;
-        DELETE FROM SESION WHERE PLAN_ENTRENA_CLIENTE_ID = P_ID;
-        DELETE FROM CLIENTE WHERE ID = P_ID;
-        IF SQL%ROWCOUNT = 0 THEN
-            RAISE_APPLICATION_ERROR(-20003, 'Error al eliminar infraestructura del cliente. Detalles: Cliente con ID = ' || p_id || ', no encontrado en la tabla Cliente');
-        END IF;
-        ELIMINA_USER(P_ID);
-    END ELIMINA_CLIENTE;
+    DELETE FROM CLIENTE WHERE ID = P_ID;
+    IF SQL%ROWCOUNT = 0 THEN
+        RAISE_APPLICATION_ERROR(-20003, 'Error al eliminar infraestructura del cliente. Detalles: Cliente con ID = ' || p_id || ', no encontrado en la tabla Cliente');
+    END IF;
+    ELIMINA_USER(P_ID);
+  END ELIMINA_CLIENTE;
 
   PROCEDURE ELIMINA_GERENTE(P_ID USUARIO.ID%TYPE) AS
   BEGIN
