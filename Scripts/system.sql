@@ -43,7 +43,7 @@ GRANT r_cliente TO LIFEFIT WITH ADMIN OPTION;
 GRANT READ, WRITE ON DIRECTORY directorio_ext TO lifefit; 
 ALTER USER LIFEFIT QUOTA 50M ON TS_INDICES;
 
-// Esto se ejecuta cuando el esquema ya está creado en Lifefit
+-- Esto se ejecuta cuando el esquema ya está creado en Lifefit
 
 BEGIN
   DBMS_RLS.DROP_POLICY (
