@@ -939,17 +939,6 @@ Begin
 End;
 /
 
-BEGIN dbms_rls.add_policy (
-	object_schema=>'LIFEFIT',                  
-	object_name=>'SESIÓN',                 
-	policy_name=>'POL_SESION',              
-	function_schema=>'LIFEFIT',              
-	policy_function=>'VPD_FUNCTION',          
-	statement_types=>'SELECT'  
-);
-end;
-/
-
 --------------------------------------------------------
 --  DDL for Packages
 --------------------------------------------------------
@@ -1030,7 +1019,7 @@ end;
 
   	PROCEDURE ELIMINA_CENTRO(P_ID CENTRO.ID%TYPE);
 
-  	PROCEDURE EJECUTAR_SQL(ACCION1 IN VARCHAR2, ACCION2 IN VARCHAR2);
+  	PROCEDURE EJECUTAR_SQL(ACCION IN VARCHAR2);
     
     END BASE;
     /
