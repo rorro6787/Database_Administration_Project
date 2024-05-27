@@ -333,8 +333,8 @@ DROP MATERIALIZED VIEW "LIFEFIT"."VM_EJERCICIOS";
 --------------------------------------------------------
 
   CREATE OR REPLACE FORCE EDITIONABLE VIEW "LIFEFIT"."VEJERCICIO" ("ID", "NOMBRE", "DESCRIPCIÓN", "VÍDEO", "IMAGEN") AS 
-  SELECT id, nombre, descripcion, video, imagen FROM "LIFEFIT"."EJERCICIO" where publico = 'S'
-;
+  SELECT id, nombre, descripción, vídeo, imagen FROM "LIFEFIT"."EJERCICIO" where publico = 'S';
+  
 --------------------------------------------------------
 --  DDL for View V_OBJETIVO_CLIENTE
 --------------------------------------------------------
@@ -425,7 +425,7 @@ GRANT SELECT ON V_DATOS_CLIENTE TO R_ENTRENADOR;
   WITH PRIMARY KEY USING DEFAULT LOCAL ROLLBACK SEGMENT
   USING ENFORCED CONSTRAINTS DISABLE ON QUERY COMPUTATION DISABLE QUERY REWRITE
   AS SELECT "EJERCICIO"."ID" "ID","EJERCICIO"."NOMBRE" "NOMBRE","EJERCICIO"."DESCRIPCIÓN" "DESCRIPCIÓN","EJERCICIO"."VÍDEO" "VÍDEO","EJERCICIO"."IMAGEN" "IMAGEN" FROM "EJERCICIO" "EJERCICIO";
-
+  
    COMMENT ON MATERIALIZED VIEW "LIFEFIT"."VM_EJERCICIOS"  IS 'snapshot table for snapshot LIFEFIT.VM_EJERCICIOS';
 REM INSERTING into LIFEFIT.CENTRO
 SET DEFINE OFF;
@@ -527,6 +527,15 @@ Insert into LIFEFIT.USUARIO (ID,NOMBRE,APELLIDOS,TELEFONO,DIRECCION,CORREO,USUAR
 Insert into LIFEFIT.USUARIO (ID,NOMBRE,APELLIDOS,TELEFONO,DIRECCION,CORREO,USUARIOORACLE) values ('28','Diego','Martín Sánchez','633789012','Avenida de la Fuente, 6','diego.martin@email.com',null);
 Insert into LIFEFIT.USUARIO (ID,NOMBRE,APELLIDOS,TELEFONO,DIRECCION,CORREO,USUARIOORACLE) values ('29','Valentina','Pérez Romero','644890123','Calle del Jardín, 8','valentina.perez@email.com',null);
 Insert into LIFEFIT.USUARIO (ID,NOMBRE,APELLIDOS,TELEFONO,DIRECCION,CORREO,USUARIOORACLE) values ('30','Álvaro','González Martínez','600901234','Avenida de la Cuesta, 10','alvaro.gonzalez@email.com',null);
+
+grant select on "VM_EJERCICIOS" to "R_CLIENTE";
+grant delete on "VM_EJERCICIOS" to "R_CLIENTE";
+grant update on "VM_EJERCICIOS" to "R_CLIENTE";
+
+grant select on "VEJERCICIO" to "R_CLIENTE";
+grant select on "VEJERCICIO" to "R_ENTRENADOR";
+grant select on "VEJERCICIO" to "R_GERENTE";
+
 --------------------------------------------------------
 --  DDL for Index CENTRO_PK
 --------------------------------------------------------
