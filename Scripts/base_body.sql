@@ -77,29 +77,32 @@ PACKAGE BODY BASE AS
   END CREA_CLIENTE;
 
   PROCEDURE ELIMINA_USER(P_ID USUARIO.ID%TYPE) AS
+    NOMBRE VARCHAR2(32);
   BEGIN
+    SELECT USUARIOORACLE INTO NOMBRE FROM USUARIO WHERE ID = P_ID;
     UPDATE USUARIO SET USUARIOORACLE = NULL WHERE id = p_id;
     IF SQL%ROWCOUNT = 0 THEN
         RAISE_APPLICATION_ERROR(-20002, 'Error al eliminar infraestructura del usuario. Detalles: Usuario con ID = ' || p_id || ', no encontrado en la tabla Usuario');
     END IF;
+    EJECUTAR_SQL('DROP USER ' || NOMBRE, '');
   END ELIMINA_USER;
 
   PROCEDURE ELIMINA_CLIENTE(P_ID USUARIO.ID%TYPE) AS
   BEGIN
-    ELIMINA_USER(P_ID);
     DELETE FROM CLIENTE WHERE ID = P_ID;
     IF SQL%ROWCOUNT = 0 THEN
         RAISE_APPLICATION_ERROR(-20003, 'Error al eliminar infraestructura del cliente. Detalles: Cliente con ID = ' || p_id || ', no encontrado en la tabla Cliente');
     END IF;
+    ELIMINA_USER(P_ID);
   END ELIMINA_CLIENTE;
 
   PROCEDURE ELIMINA_GERENTE(P_ID USUARIO.ID%TYPE) AS
   BEGIN
-    ELIMINA_USER(P_ID);
     DELETE FROM GERENTE WHERE ID = P_ID;
     IF SQL%ROWCOUNT = 0 THEN
         RAISE_APPLICATION_ERROR(-20003, 'Error al eliminar infraestructura del gerente. Detalles: Gerente con ID = ' || p_id || ', no encontrado en la tabla Gerente');
     END IF;
+    ELIMINA_USER(P_ID);
   END ELIMINA_GERENTE;
 
   PROCEDURE ELIMINA_ENTRENADOR(P_ID USUARIO.ID%TYPE) AS
@@ -109,6 +112,7 @@ PACKAGE BODY BASE AS
     IF SQL%ROWCOUNT = 0 THEN
         RAISE_APPLICATION_ERROR(-20003, 'Error al eliminar infraestructura del entrenador. Detalles: Entrenador con ID = ' || p_id || ', no encontrado en la tabla Entrenador');
     END IF;
+    ELIMINA_USER(P_ID);
   END ELIMINA_ENTRENADOR;
 
   PROCEDURE ELIMINA_CENTRO(P_ID CENTRO.ID%TYPE) AS
