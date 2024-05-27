@@ -86,8 +86,11 @@ PACKAGE BODY BASE AS
 
   PROCEDURE ELIMINA_CLIENTE(P_ID USUARIO.ID%TYPE) AS
   BEGIN
-    -- TAREA: Se necesita implantación para PROCEDURE BASE.ELIMINA_CLIENTE
-    NULL;
+    ELIMINA_USER(P_ID);
+    DELETE FROM CLIENTE WHERE ID = P_ID;
+    IF SQL%ROWCOUNT = 0 THEN
+        RAISE_APPLICATION_ERROR(-20003, 'Error al eliminar infraestructura del cliente. Detalles: Cliente con ID = ' || p_id || ', no encontrado en la tabla Cliente');
+    END IF;
   END ELIMINA_CLIENTE;
 
   PROCEDURE ELIMINA_GERENTE(P_ID USUARIO.ID%TYPE) AS
@@ -100,12 +103,9 @@ PACKAGE BODY BASE AS
   END ELIMINA_GERENTE;
 
   PROCEDURE ELIMINA_ENTRENADOR(P_ID USUARIO.ID%TYPE) AS
-    CURSOR cur_gerente IS SELECT ID, CENTRO_ID FROM GERENTE;
   BEGIN
     ELIMINA_USER(P_ID);
-
     DELETE FROM ENTRENADOR WHERE ID = P_ID;
-    
     IF SQL%ROWCOUNT = 0 THEN
         RAISE_APPLICATION_ERROR(-20003, 'Error al eliminar infraestructura del entrenador. Detalles: Entrenador con ID = ' || p_id || ', no encontrado en la tabla Entrenador');
     END IF;
