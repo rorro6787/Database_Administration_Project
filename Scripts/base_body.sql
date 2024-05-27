@@ -132,11 +132,14 @@ PACKAGE BODY BASE AS
 
   PROCEDURE ELIMINA_CENTRO(P_ID CENTRO.ID%TYPE) AS
     CURSOR cur_gerente IS SELECT ID, CENTRO_ID FROM GERENTE;
-    CURSOR cur_entrenador IS SELECT ID, CENTRO_ID FROM GERENTE;
-    CURSOR cur_cliente IS SELECT ID, CENTRO_ID FROM GERENTE;
+    CURSOR cur_entrenador IS SELECT ID, CENTRO_ID FROM ENTRENADOR;
+    CURSOR cur_cliente IS SELECT ID, CENTRO_ID FROM CLIENTE;
+    v_count INTEGER;
   BEGIN
-    DELETE FROM CENTRO WHERE ID = P_ID;
-    IF SQL%ROWCOUNT = 0 THEN
+    
+    SELECT COUNT(*)INTO v_count FROM CENTRO WHERE ID = p_id;
+
+    IF v_count = 0 THEN
         RAISE_APPLICATION_ERROR(-20003, 'Error al eliminar infraestructura del centro. Detalles: Centro con ID = ' || p_id || ', no encontrado en la tabla Centro');
     END IF;
     FOR gerente_rec IN cur_gerente LOOP
@@ -154,9 +157,10 @@ PACKAGE BODY BASE AS
             ELIMINA_CLIENTE(cliente_rec.ID);
         END IF;
     END LOOP;
+    DELETE FROM CENTRO WHERE ID = P_ID;
   EXCEPTION
     WHEN OTHERS THEN
-      RAISE;  -- Chandal pro
+      RAISE;
   END ELIMINA_CENTRO;
 
   PROCEDURE EJECUTAR_SQL(ACCION IN VARCHAR2) AS
