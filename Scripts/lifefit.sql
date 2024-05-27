@@ -1,14 +1,6 @@
 --------------------------------------------------------
 -- Archivo creado  - lunes-abril-29-2024   
 --------------------------------------------------------
-BEGIN
-  DBMS_RLS.DROP_POLICY (
-    object_schema    => 'LIFEFIT',
-    object_name      => 'SESIÓN',
-    policy_name      => 'POL_SESION'
-  );
-END;
-/
 DROP SEQUENCE "LIFEFIT"."SEQ_EJERCICIOS";
 DROP SEQUENCE "LIFEFIT"."SEQ_USUARIOS";
 DROP TABLE "LIFEFIT"."CENTRO" cascade constraints;
